@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecommerce Marketplace</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input-group {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+
+        .search-input {
+            border: none;
+            padding: 15px 20px;
+            font-size: 16px;
+        }
+
+        .search-input:focus {
+            box-shadow: none;
+            border: none;
+        }
+
+        .search-btn {
+            border: none;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            transition: background-color 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #218838;
+        }
+
+        .search-icon {
+            background: white;
+            border: none;
+            padding: 15px 20px;
+            color: #6c757d;
+        }
+
+        .product-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-image {
+            height: 250px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 0;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .product-price {
+            font-size: 1.75rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .rating-badge {
+            display: inline-block;
+            background-color: #e6f7f2; /* Light green background */
+            color: #00897b;           /* Darker green text */
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .rating-badge .fa-star {
+            margin-right: 5px; /* Adds space between the star and the number */
+        }
+
+        /* Make carousel controls more visible */
+        .product-card .carousel-control-prev,
+        .product-card .carousel-control-next {
+            background-color: rgba(0, 0, 0, 0.4);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .product-card .carousel-control-prev {
+            left: 10px;
+        }
+
+        .product-card .carousel-control-next {
+            right: 10px;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom: none;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .product-detail-image {
+            max-height: 400px;
+            object-fit: cover;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="container position-relative">
+
+            <a href="/" class="btn btn-light position-absolute top-0 start-0 m-2">
+                <i class="fas fa-home me-2"></i>Home
+            </a>
+
+            <div class="text-center mb-4">
+                <h1 class="display-4 fw-bold">Ecommerce Marketplace</h1>
+                <p class="lead">Discover amazing products tailored just for you</p>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <form action="/recommend" method="post">
+                    <div class="input-group search-input-group">
+                        <button class="btn search-icon" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <input type="text" name="user_input" class="form-control search-input" id="searchInput"
+                               placeholder="Search for products, brands, categories...">
+                        <button class="btn search-btn" type="submit">
+                            <i class="fas fa-arrow-right me-2"></i>Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+
+        {% if data is not none %}
+            {% if data %}
+                <div id="results-container">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 id="results-title">Search Results</h4>
+                        <span id="results-count" class="badge bg-primary fs-6">{{ data|length }} Results</span>
+                    </div>
+                    <div class="row" id="products-grid">
+                         {% for i in data %}
+                            <div class="col-md-3" style="margin-top:50px">
+                                <div class="card h-100 product-card">
+                                    <div id="carousel{{ loop.index }}" class="carousel slide">
+                                        <div class="carousel-inner">
+                                            {% for image in i[0].split('|') %}
+                                            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                                <img src="{{ image.strip() }}" class="d-block w-100 product-image" alt="...">
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ loop.index }}" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Previous</span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ loop.index }}" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Next</span>
+                                        </button>
+                                    </div>
+                                    <div class="card-body"
+                                         data-bs-toggle="modal"
+                                         data-bs-target="#productModal"
+                                         data-name="{{ i[1] }}"
+                                         data-description="{{ i[2] }}"
+                                         data-price="{{ i[3] }}"
+                                         data-rating="{{ i[4] }}"
+                                         data-reviews="{{ i[5] }}"
+                                         data-images="{{ i[0] }}">
+                                        <h5>{{ i[1] }}</h5>
+                                        <p style="font-size: smaller">
+                                            {% set words = i[2].split() %}
+                                            {% if words | length > 30 %}{{ words[:30] | join(' ') ~ '...' }}{% else %}{{ i[2] }}{% endif %}
+                                        </p>
+                                        <div class="product-price">${{ i[3] }}</div>
+                                        {% if i[5] and i[5]|string|lower != 'nan' %}
+                                            <div class="rating-badge"><i class="fas fa-star"></i> {{ i[4].round(2) }} ({{ i[5] | int }})</div>
+                                        {% else %}
+                                            <div class="rating-badge"><i class="fas fa-star"></i> {{ i[4].round(2) }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                         {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <h3>Product Not Found</h3>
+                    <p>We couldn't find any products matching your search. Please try something different.</p>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-shopping-cart"></i>
+                <h3>Start Your Shopping Journey</h3>
+                <p>Use the search bar above to find amazing products</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalLabel">Product Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img id="modal-product-image" src="" alt="" class="product-detail-image rounded">
+                        </div>
+                        <div class="col-md-6">
+                            <h4 id="modal-product-name" class="mb-3"></h4>
+                            <div class="mb-3">
+                                <span id="modal-product-price" class="product-price"></span>
+                                <span id="modal-product-original-price" class="text-muted text-decoration-line-through ms-2"></span>
+                            </div>
+                            <div class="mb-3">
+                                <span id="modal-product-rating" class="product-rating"></span>
+                                <span id="modal-product-reviews" class="text-muted ms-2"></span>
+                            </div>
+                            <div class="mb-3">
+                                <span class="badge bg-success" id="modal-product-category"></span>
+                            </div>
+                            <p id="modal-product-description" class="text-muted"></p>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary btn-lg">
+                                    <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                                </button>
+                                <button class="btn btn-outline-secondary">
+                                    <i class="fas fa-heart me-2"></i>Add to Wishlist
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

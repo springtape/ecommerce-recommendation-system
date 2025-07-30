@@ -1,0 +1,16 @@
+# Python virtual environment
+venv/
+*.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore large model files
+models/
+
+# Or ignore the entire datasets folder
+datasets/
