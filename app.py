@@ -31,6 +31,9 @@ def search_product(query, product_list):
 
 def recommend():
     user_input = request.form.get('user_input')
+    if not user_input or not user_input.strip():
+        return render_template('index.html', data=[])
+
     product_name = search_product(user_input, list(products_with_tags['Product Name']))
     data = []
 
@@ -40,13 +43,12 @@ def recommend():
         for i in sorted(list(enumerate(similarity[product_index])), reverse=True, key=lambda x: x[1])[1:21]:
             product = products_with_tags.iloc[i[0]]['Product Name']
             temp_df = products[products['Product Name'] == product]
-            item = []
-            item.append(temp_df['Product Image Url'].values[0])
-            item.append(temp_df['Product Name'].values[0])
-            item.append(temp_df['Product Description'].values[0])
-            item.append(temp_df['Product Price'].values[0])
-            item.append(temp_df['Product Rating'].values[0])
-            item.append(temp_df['Product Reviews Count'].values[0])
+            item = [temp_df['Product Image Url'].values[0],
+                    temp_df['Product Name'].values[0],
+                    temp_df['Product Description'].values[0],
+                    temp_df['Product Price'].values[0],
+                    temp_df['Product Rating'].values[0],
+                    temp_df['Product Reviews Count'].values[0]]
 
             data.append(item)
 
